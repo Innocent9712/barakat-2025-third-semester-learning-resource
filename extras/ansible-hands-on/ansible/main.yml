@@ -1,0 +1,65 @@
+---
+- name: Simple FastAPI setup
+  hosts: all
+  become: yes
+
+  vars:
+    repo_url: "http://github.com/Innocent9712/ansible-handson.git"
+    app_dir: "/home/ec2-user/fastapi-app"
+    venv_dir: "{{ app_dir }}/app/venv"
+    listen_port: 8000
+
+  tasks:
+    - name: Install Python 3 and pip
+      yum:
+        name:
+          - python3
+          - python3-pip
+          - python3-virtualenv
+          - git
+        state: present
+
+    - name: Clone FastAPI app
+      become: false
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        update: yes
+
+    - name: Install dependencies
+      become: false
+      pip:
+        requirements: "{{ app_dir }}/app/requirements.txt"
+        virtualenv: "{{ venv_dir }}"
+        virtualenv_command: "python3 -m venv"
+
+    - name: Create FastAPI systemd service file
+      template:
+        src: fastapi.service.j2
+        dest: /etc/systemd/system/fastapi.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart FastAPI service
+
+    - name: Enable and start FastAPI service
+      systemd:
+        name: fastapi
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+    - name: Wait for FastAPI to respond
+      uri:
+        url: "http://localhost:{{ listen_port }}/health"
+        return_content: yes
+      register: result
+      retries: 5
+      delay: 2
+      until: result.status == 200
+
+  handlers:
+    - name: Restart FastAPI service
+      systemd:
+        name: fastapi
+        state: restarted
