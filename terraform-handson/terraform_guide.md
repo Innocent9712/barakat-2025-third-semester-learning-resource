@@ -1,4 +1,4 @@
-# A Complete Guide to Terraform for a Single-Session Class
+# A Complete Guide to Terraform
 
 This guide serves as a comprehensive reference for our class on Terraform. It is designed to be a concise yet complete document you can follow along with and use for self-study afterward. We'll cover everything from the foundational principles to advanced, real-world concepts.
 
