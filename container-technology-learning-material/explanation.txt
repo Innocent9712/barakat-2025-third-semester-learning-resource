@@ -1,0 +1,27 @@
+15496 -> 1
+10.34.222.162 -> 127.0.0.1, 192.168.0.1
+/var/container-1 -> /
+
+
+/etc/mysql
+/var/lib/mysql
+/run/mysqld/mysqld.sock
+/tmp/logs/mysql
+
+3306
+
+mysql
+
+
+
+
+MNT -> /etc/mysq1 -> /etc/mysql /var/lib/mysql1 -> /var/lib/mysql /run/mysqld1/mysqld.sock -> /run/mysqld/mysqld.sock /tmp/logs/mysql1 -> /tmp/logs/mysql
+NET -> 3308 -> 3306
+RAM -> 2GB
+STORAGE -> 500MB
+
+
+MNT -> /etc/mysq2 -> /etc/mysql /var/lib/mysql2 -> /var/lib/mysql /run/mysqld2/mysqld.sock -> /run/mysqld/mysqld.sock /tmp/logs/mysql2 -> /tmp/logs/mysql
+NET -> 3308 -> 3306
+RAM -> 1GB
+STORAGE -> 250MB
