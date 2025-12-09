@@ -1,0 +1,284 @@
+# Define named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_logs:
+    driver: local
+
+# Define custom networks for service communication
+networks:
+  app-network:
+    driver: bridge
+    # ipam:
+    #   config:
+    #     - subnet: 172.20.0.0/16
+
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    hostname: postgres-db
+    networks:
+      - app-network
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: securepassword
+      POSTGRES_DB: appdb
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: Mount initialization scripts
+      # - ./init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    hostname: redis-cache
+    networks:
+      - app-network
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+        reservations:
+          memory: 64M
+          cpus: '0.05'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # FastAPI Application Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    image: docker-demo-app:latest
+    container_name: demo-app-backend
+    hostname: demo-app-backend
+    networks:
+      - app-network
+    environment:
+      DATABASE_URL: "postgresql://appuser:securepassword@postgres-db:5432/appdb"
+      REDIS_URL: "redis://redis-cache:6379/0"
+      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:4173,http://localhost:3000,http://localhost:8080,http://localhost:3001,http://frontend:3000"
+      ENVIRONMENT: "production"
+      # Optional: Add more environment variables
+      # PORT: "8000"
+      LOG_LEVEL: "info"
+      WORKERS: "2"
+    volumes:
+      - app_logs:/app/logs
+      # Optional: Mount config files
+      # - ./config:/app/config:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_PROXY_TARGET=http://backend:8000
+        # - VITE_API_BASE_URL=http://backend:8000
+        - VITE_API_BASE_URL=http://localhost:8000
+    image: demo-frontend:latest
+    container_name: demo-app-frontend
+    hostname: demo-app-frontend
+    networks:
+      - app-network
+    environment:
+      - NODE_ENV=production
+      # Optionally pass VITE_API_PROXY_TARGET here if you want runtime env (not needed for static serve)
+      # - VITE_API_PROXY_TARGET=http://app:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+        reservations:
+          memory: 64M
+          cpus: '0.05'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: nginx reverse proxy (uncomment if needed)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: nginx-proxy
+  #   networks:
+  #     - app-network
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   depends_on:
+  #     - app
+  #   restart: unless-stopped
+
+  # Optional: Redis for caching (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis-cache
+  #   networks:
+  #     - app-network
+  #   volumes:
+  #     - redis_data:/data
+  #   ports:
+  #     - "6379:6379"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 128M
+  #         cpus: '0.1'
+  #   restart: unless-stopped
+
+# =============================================================================
+# DOCKER COMPOSE USAGE COMMANDS:
+# =============================================================================
+
+# Build and start all services
+# docker-compose up --build -d
+
+# Start services (using existing images)
+# docker-compose up -d
+
+# Stop all services
+# docker-compose down
+
+# Stop and remove volumes (WARNING: Deletes data!)
+# docker-compose down -v
+
+# View logs for all services
+# docker-compose logs -f
+
+# View logs for specific service
+# docker-compose logs -f app
+
+# Scale the application (if needed)
+# docker-compose up -d --scale app=3
+
+# Restart specific service
+# docker-compose restart app
+
+# Execute command in running container
+# docker-compose exec app /bin/bash
+# docker-compose exec postgres psql -U appuser -d appdb
+
+# =============================================================================
+# PRODUCTION CONSIDERATIONS:
+# =============================================================================
+
+# 1. SECRETS MANAGEMENT:
+#    In production, use Docker Secrets or external secret management:
+#    secrets:
+#      postgres_password:
+#        external: true
+#    
+#    Then reference in service:
+#    environment:
+#      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+
+# 2. ENVIRONMENT-SPECIFIC CONFIGS:
+#    Use docker-compose.override.yml for development
+#    Use docker-compose.prod.yml for production
+#    Command: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+# 3. HEALTH CHECKS AND MONITORING:
+#    Implement proper health checks
+#    Use external monitoring solutions (Prometheus, Grafana)
+#    Set up log aggregation (ELK stack, Fluentd)
+
+# 4. BACKUP STRATEGIES:
+#    Regular database backups
+#    Volume backup strategies
+#    Disaster recovery procedures
+
+# 5. SECURITY BEST PRACTICES:
+#    Use non-root users in containers
+#    Network segmentation
+#    Regular security updates
+#    Secrets management
+#    Container image scanning
