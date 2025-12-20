@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-web-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo-web-app
+  template:
+    metadata:
+      labels:
+        app: demo-web-app
+    spec:
+      imagePullSecrets:
+      - name: dockerhub-secret
+      containers:
+      - name: demo-web-app
+        image: iaminnocent/demo-web-app:v1.0.1  # Note: In a real cluster, you'd push this to ECR/DockerHub
+        # imagePullPolicy: Never      # Only works for local clusters or if image is manually loaded
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+      #   volumeMounts:
+      #   - mountPath: "/var/log/nginx"
+      #     name: log-storage
+      # volumes:
+      # - name: log-storage
+      #   persistentVolumeClaim:
+      #     claimName: log-pvc

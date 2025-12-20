@@ -1,0 +1,29 @@
+# 1. PersistentVolume (The actual storage resource)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: log-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/k8s-logs"
+
+---
+# 2. PersistentVolumeClaim (The request for storage)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: log-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
