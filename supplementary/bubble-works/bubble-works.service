@@ -1,0 +1,18 @@
+[Unit]
+Description=Bubble Works Node.js App
+After=network.target
+
+[Service]
+# User and Group should be updated to match the server's user
+User=bubbleuser
+Group=bubbleuser
+# Update WorkingDirectory to the actual path on the server
+WorkingDirectory=/var/www/bubble-works
+ExecStart=/usr/bin/node index.js
+Restart=always
+# Environment variables
+Environment=PORT=3000
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,177 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bubble-config
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bubble Works API | Modern Backend Solutions</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --primary: #6366f1;
+                --primary-glow: rgba(99, 102, 241, 0.4);
+                --bg: #0f172a;
+                --card-bg: rgba(30, 41, 59, 0.7);
+                --text-main: #f8fafc;
+                --text-dim: #94a3b8;
+                --accent: #f472b6;
+            }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+                font-family: 'Outfit', sans-serif; 
+                background-color: var(--bg); 
+                color: var(--text-main); 
+                line-height: 1.6; 
+                min-height: 100vh; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center; 
+            }
+            .container { max-width: 1000px; padding: 2rem; text-align: center; }
+            h1 { font-size: 4rem; margin-bottom: 1rem; color: #fff; }
+            .subtitle { font-size: 1.25rem; color: var(--text-dim); margin-bottom: 2.5rem; }
+            .cta-group { display: flex; gap: 1rem; justify-content: center; }
+            .btn { 
+                padding: 0.875rem 2rem; 
+                border-radius: 0.75rem; 
+                font-weight: 600; 
+                text-decoration: none; 
+                transition: all 0.2s; 
+            }
+            .btn-primary { background: var(--primary); color: white; }
+            .btn-outline { border: 1px solid rgba(255, 255, 255, 0.1); color: white; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Bubble Works API</h1>
+            <p class="subtitle">A lightweight, high-performance Express bootstrapping kit.</p>
+            <div class="cta-group">
+                <a href="/api/info" class="btn btn-primary">Check Stats</a>
+                <a href="/api/health" class="btn btn-outline">Health Status</a>
+            </div>
+        </div>
+    </body>
+    </html>
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+
+        location /api/ {
+            proxy_pass http://bubble-api-service:3000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bubble-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bubble-api
+  template:
+    metadata:
+      labels:
+        app: bubble-api
+    spec:
+      containers:
+      - name: bubble-api
+        image: innocent9712/bubble-works:latest # Replace with actual image
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bubble-api-service
+spec:
+  selector:
+    app: bubble-api
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bubble-landing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bubble-landing
+  template:
+    metadata:
+      labels:
+        app: bubble-landing
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: html-volume
+        configMap:
+          name: bubble-config
+          items:
+          - key: index.html
+            path: index.html
+      - name: config-volume
+        configMap:
+          name: bubble-config
+          items:
+          - key: default.conf
+            path: default.conf
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bubble-landing-service
+spec:
+  selector:
+    app: bubble-landing
+  ports:
+    - protocol: TCP
+      port: 30080
+      targetPort: 80
+  type: NodePort

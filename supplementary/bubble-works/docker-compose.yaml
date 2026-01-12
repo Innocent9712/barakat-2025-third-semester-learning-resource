@@ -1,0 +1,12 @@
+services:
+    bubble-works:
+        image: bubble-works:latest
+        ports:
+            - "8000:3000"
+
+    bubble-landing-page:
+        image: nginx:latest
+        ports:
+            - "8080:80"
+        volumes:
+            - ./landing-page/index.html:/usr/share/nginx/html/index.html

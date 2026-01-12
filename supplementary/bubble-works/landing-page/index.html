@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Works API | Modern Backend Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #f472b6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(244, 114, 182, 0.1) 0%, transparent 40%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            padding: 2rem;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero {
+            margin-bottom: 4rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 999px;
+            color: var(--primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        p.subtitle {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            text-align: left;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 40px -10px var(--primary-glow);
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        .card .icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            color: var(--primary);
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 14px 0 var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .btn-outline {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glass decorative elements */
+        .blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            filter: blur(120px);
+            opacity: 0.1;
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            top: -100px;
+            left: -100px;
+        }
+
+        .blob-2 {
+            bottom: -100px;
+            right: -100px;
+            background: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="container">
+        <header class="hero">
+            <span class="badge">v1.0.0 Stable</span>
+            <h1>Bubble Works API</h1>
+            <p class="subtitle">A lightweight, high-performance Express bootstrapping kit designed for rapid application
+                development and modern aesthetics.</p>
+
+            <div class="cta-group">
+                <a href="/api/info" class="btn btn-primary">Check Stats</a>
+                <a href="/api/health" class="btn btn-outline">Health Status</a>
+            </div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <div class="icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h3>Blazing Fast</h3>
+                <p>Built with Express for minimal overhead and maximum throughput for your backend services.</p>
+            </div>
+
+            <div class="card">
+                <div class="icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <h3>Secure by Default</h3>
+                <p>Pre-configured with industry standard middleware to keep your data protected at all times.</p>
+            </div>
+
+            <div class="card">
+                <div class="icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <h3>Scalable Architecture</h3>
+                <p>Optimized for containerization and cloud-native deployments with Docker support out of the box.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
