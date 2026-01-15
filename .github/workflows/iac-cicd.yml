@@ -1,0 +1,38 @@
+name: IaC CI/CD
+
+on:
+  push:
+    branches:
+      - 'feature/*'
+      - 'master'
+    paths:
+      - 'cicd-hands-on/cloud-launch-project/**'
+
+jobs:
+  validate:
+    if: startsWith(github.ref, 'refs/heads/feature/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        run: terraform init
+        working-directory: cicd-hands-on/cloud-launch-project
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: cicd-hands-on/cloud-launch-project
+
+  plan:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        run: terraform init
+        working-directory: cicd-hands-on/cloud-launch-project
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: cicd-hands-on/cloud-launch-project
