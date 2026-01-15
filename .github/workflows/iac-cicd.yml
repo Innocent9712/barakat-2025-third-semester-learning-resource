@@ -6,7 +6,7 @@ on:
       - 'feature/*'
       - 'master'
     paths:
-      - 'cicd-hands-on/cloud-launch-project/**'
+      - 'cicd-hands-on/**'
 
 jobs:
   validate:

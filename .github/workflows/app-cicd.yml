@@ -6,7 +6,7 @@ on:
       - 'feature/*'
       - 'master'
     paths:
-      - 'cicd-hands-on/app/**'
+      - 'cicd-hands-on/**'
 
 jobs:
   test:
