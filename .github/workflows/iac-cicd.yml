@@ -18,10 +18,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
       - name: Terraform Init
         run: terraform init
-        working-directory: cicd-hands-on/cloud-launch-project
+        working-directory: cicd-hands-on/iac
       - name: Terraform Validate
         run: terraform validate
-        working-directory: cicd-hands-on/cloud-launch-project
+        working-directory: cicd-hands-on/iac
 
   plan:
     if: github.ref == 'refs/heads/master'
@@ -32,7 +32,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
       - name: Terraform Init
         run: terraform init
-        working-directory: cicd-hands-on/cloud-launch-project
+        working-directory: cicd-hands-on/iac
       - name: Terraform Plan
         run: terraform plan
-        working-directory: cicd-hands-on/cloud-launch-project
+        working-directory: cicd-hands-on/iac
