@@ -131,7 +131,7 @@ resource "aws_autoscaling_group" "bubble_asg" {
   max_size            = 2
   min_size            = 2
   target_group_arns   = [aws_lb_target_group.bubble_tg.arn]
-  vpc_zone_identifier = data.aws_subnets.public.ids
+  availability_zones  = ["us-east-1a", "us-east-1b"]
 
   launch_template {
     id      = aws_launch_template.bubble_lt.id

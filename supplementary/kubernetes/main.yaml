@@ -100,7 +100,7 @@ spec:
     spec:
       containers:
       - name: bubble-api
-        image: innocent9712/bubble-works:latest # Replace with actual image
+        image: iaminnocent/bubble-works:latest
         ports:
         - containerPort: 3000
         env:
@@ -172,6 +172,7 @@ spec:
     app: bubble-landing
   ports:
     - protocol: TCP
-      port: 30080
+      port: 80
       targetPort: 80
+      nodePort: 30080
   type: NodePort
