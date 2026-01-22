@@ -36,3 +36,12 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
         working-directory: cicd-hands-on/iac
+
+
+
+# deploy-active-prod.yml
+# deploy-passive-prod.yml
+# promote-passive-to-active.yml
+
+
+# cicd-passive-prod.yml
