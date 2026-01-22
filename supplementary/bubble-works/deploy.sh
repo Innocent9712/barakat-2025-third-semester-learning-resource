@@ -41,3 +41,5 @@ if [ -z "$SERVER_IP" ]; then
 else
     deploy_remotely
 fi
+
+
